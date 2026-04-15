@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Local secrets and environment (API keys, etc.)
+.env
+.env.local
+.env.*.local
+
+# Node.js (if you add npm later)
+node_modules/
+
+# Python (http.server, scripts, tooling)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# JetBrains IDEs
+.idea/

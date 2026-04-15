@@ -1,0 +1,17 @@
+---
+description: Pattern AI Assistant — architecture and conventions
+globs: "**/*.{html,js,css}"
+alwaysApply: false
+---
+
+# Pattern AI Assistant
+
+Follow the specs in `.agents/`:
+
+- **UI copy**: Brazilian Portuguese (`assets/js/i18n/pt-br.js`).
+- **Code and comments**: English.
+- **Layers**: `domain` → `application` → `infrastructure` / `presentation` (see `.agents/ARCHITECTURE.md`).
+- **Patterns in code**: Strategy (AI providers), Adapters (HTTP), Facade (analysis flow) — see `.agents/PATTERNS-IN-CODE.md`.
+- **ES modules**: serve over HTTP; `file://` may fail.
+
+Do not add a bundler unless the user asks. Prefer small, focused modules and SOLID-friendly boundaries.

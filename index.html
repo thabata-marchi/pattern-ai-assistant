@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern AI Assistant</title>
+<!--
+  Pattern AI Assistant — Unified App
+  MIT License · Open Source
+  BYOK via OpenRouter + Ollama (local) + TensorFlow.js pre-classifier
+
+  Author: Thabata Marchi
+  github.com/thabata-marchi
+  Knowledge base: refactoring.guru · GoF 1994 · Fowler 2002
+-->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- TensorFlow.js must load before the app module; ES modules require HTTP(S) — use a static server or GitHub Pages, not file:// -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="nav-logo">Pattern<span>AI</span> <em>Assistant</em></div>
+  <div class="nav-tabs">
+    <button type="button" class="nav-tab active" data-nav-page="library" id="navtab-library">
+      <span class="tab-pip"></span>📚 Biblioteca
+    </button>
+    <button type="button" class="nav-tab" data-nav-page="recommender" id="navtab-recommender">
+      <span class="tab-pip"></span>🧭 Recommender
+    </button>
+    <button type="button" class="nav-tab" data-nav-page="detector" id="navtab-detector">
+      <span class="tab-pip"></span>🔍 Detector
+    </button>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge nb-mit">MIT</span>
+    <span class="nav-badge nb-os">Open Source</span>
+  </div>
+</nav>
+
+<!-- =====================================================
+     PAGE: LIBRARY
+===================================================== -->
+<div id="page-library" class="page active">
+  <div class="lib-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="lib-sidebar" id="libSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Design Patterns</div>
+        <input class="sidebar-search" type="search" placeholder="Buscar pattern..." oninput="searchPatterns(this.value)" id="sidebarSearch">
+      </div>
+
+      <!-- GOF -->
+      <div class="sidebar-group" id="sg-gof">
+        <div class="sidebar-group-header" onclick="toggleGroup('sg-gof')">
+          <div class="sidebar-dot dot-gray"></div>
+          <span class="sidebar-group-label">GoF — O que é?</span>
+          <span class="sidebar-group-arrow">▾</span>
+        </div>
+        <div class="sidebar-group-items">
+          <a class="sidebar-link cat-gray" onclick="scrollToPattern('gof-section')">📖 Sobre o GoF</a>
+        </div>
+      </div>
+
+      <!-- CREATION -->
+      <div class="sidebar-group" id="sg-criacao">
+        <div class="sidebar-group-header" onclick="toggleGroup('sg-criacao')">
+          <div class="sidebar-dot dot-red"></div>
+          <span class="sidebar-group-label">Padrões de Criação</span>
+          <span class="sidebar-group-arrow">▾</span>
+        </div>
+        <div class="sidebar-group-items" id="items-criacao">
+          <a class="sidebar-link cat-red" onclick="scrollToPattern('abstract-factory')">Abstract Factory</a>
+          <a class="sidebar-link cat-red" onclick="scrollToPattern('factory-method')">Factory Method</a>
+          <a class="sidebar-link cat-red" onclick="scrollToPattern('singleton')">Singleton</a>
+          <a class="sidebar-link cat-red" onclick="scrollToPattern('prototype')">Prototype</a>
+          <a class="sidebar-link cat-red" onclick="scrollToPattern('builder')">Builder</a>
+        </div>
+      </div>
+
+      <!-- STRUCTURE -->
+      <div class="sidebar-group" id="sg-estrutura">
+        <div class="sidebar-group-header" onclick="toggleGroup('sg-estrutura')">
+          <div class="sidebar-dot dot-green"></div>
+          <span class="sidebar-group-label">Padrões de Estrutura</span>
+          <span class="sidebar-group-arrow">▾</span>
+        </div>
+        <div class="sidebar-group-items" id="items-estrutura">
+          <a class="sidebar-link cat-green" onclick="scrollToPattern('adapter')">Adapter</a>
+          <a class="sidebar-link cat-green" onclick="scrollToPattern('bridge')">Bridge</a>
+          <a class="sidebar-link cat-green" onclick="scrollToPattern('composite')">Composite</a>
+          <a class="sidebar-link cat-green" onclick="scrollToPattern('flyweight')">Flyweight</a>
+          <a class="sidebar-link cat-green" onclick="scrollToPattern('facade')">Facade</a>
+          <a class="sidebar-link cat-green" onclick="scrollToPattern('proxy')">Proxy</a>
+          <a class="sidebar-link cat-green" onclick="scrollToPattern('decorator')">Decorator</a>
+        </div>
+      </div>
+
+      <!-- BEHAVIOR -->
+      <div class="sidebar-group" id="sg-comportamento">
+        <div class="sidebar-group-header" onclick="toggleGroup('sg-comportamento')">
+          <div class="sidebar-dot dot-blue"></div>
+          <span class="sidebar-group-label">Padrões de Comportamento</span>
+          <span class="sidebar-group-arrow">▾</span>
+        </div>
+        <div class="sidebar-group-items" id="items-comportamento">
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('chain')">Chain of Responsibility</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('command')">Command</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('mediator')">Mediator</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('observer')">Observer</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('iterator')">Iterator</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('interpreter')">Interpreter</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('memento')">Memento</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('state')">State</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('strategy')">Strategy</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('template')">Template Method</a>
+          <a class="sidebar-link cat-blue" onclick="scrollToPattern('visitor')">Visitor</a>
+        </div>
+      </div>
+
+      <!-- POEAA -->
+      <div class="sidebar-group" id="sg-poeaa">
+        <div class="sidebar-group-header" onclick="toggleGroup('sg-poeaa')">
+          <div class="sidebar-dot dot-gray"></div>
+          <span class="sidebar-group-label">POEAA — Fowler</span>
+          <span class="sidebar-group-arrow">▾</span>
+        </div>
+        <div class="sidebar-group-items">
+          <a class="sidebar-link cat-gray" onclick="scrollToPattern('repository')">Repository</a>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="lib-main" id="libMain">
+
+      <!-- HERO -->
+      <div class="lib-hero">
+        <h1>Design<br><em>Patterns</em><br>Guia Completo</h1>
+        <p>GoF · POEAA · exemplos do dia a dia · implementação Flutter/Dart</p>
+        <div class="lib-hero-badges">
+          <span class="lib-badge lb-red">GoF Criação</span>
+          <span class="lib-badge lb-green">GoF Estrutura</span>
+          <span class="lib-badge lb-blue">GoF Comportamento</span>
+          <span class="lib-badge lb-yellow">POEAA</span>
+        </div>
+      </div>
+
+      <div class="lib-progress">
+        <span>Progresso</span>
+        <div class="progress-outer"><div class="progress-inner" id="heroProgressBar" style="width:0%"></div></div>
+        <span id="heroProgressText">0 / 24</span>
+      </div>
+
+      <!-- GOF SECTION -->
+      <div id="gof-section" style="scroll-margin-top:72px;">
+        <div class="lib-section-header">
+          <h2>O que é o <em style="font-style:italic;color:#c84b2f">GoF</em>?</h2>
+          <div class="lib-section-meta">Gang of Four · 1994</div>
+        </div>
+        <div class="gof-explainer">
+          <div class="gof-explainer-title">📖 Contexto histórico</div>
+          <p><strong>GoF = Gang of Four</strong> — "A Gangue dos Quatro". São quatro engenheiros que em <strong>1994</strong> publicaram o livro <em>"Design Patterns: Elements of Reusable Object-Oriented Software"</em>, a bíblia dos design patterns. Os autores são <strong>Erich Gamma, Richard Helm, Ralph Johnson</strong> e <strong>John Vlissides</strong>.<br><br>
+          Eles resolveram um problema real: todo mundo estava reinventando a roda. O GoF nomeou e documentou <strong>23 soluções</strong> que já funcionavam, criando uma linguagem comum entre devs. Hoje, quando você fala "vou usar um Observer aqui", qualquer dev sênior do mundo entende imediatamente.<br><br>
+          <strong>📚 Fonte:</strong> Gamma, E., Helm, R., Johnson, R., Vlissides, J. (1994). <em>Design Patterns: Elements of Reusable Object-Oriented Software.</em> Addison-Wesley. ISBN 0-201-63361-2.</p>
+        </div>
+      </div>
+
+      <!-- CREATION -->
+      <div class="lib-section-header">
+        <h2 style="color:#c84b2f">Padrões de Criação</h2>
+        <div class="lib-section-meta">5 patterns · Como objetos nascem</div>
+      </div>
+      <div class="lib-section-intro">Definem <strong>como os objetos são criados</strong>, desacoplando o código que usa os objetos do código que os instancia.</div>
+
+      <!-- ABSTRACT FACTORY -->
+      <div class="pattern-card" id="abstract-factory">
+        <div class="pattern-card-header">
+          <div class="pattern-num">01</div>
+          <div class="pattern-title-block">
+            <h3>Abstract Factory</h3>
+            <div class="pattern-subtitle">Fábrica de fábricas · Família de objetos relacionados</div>
+          </div>
+          <span class="p-badge lb-red">Criação</span>
+        </div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p>Uma <strong>rede de restaurantes</strong> no Brasil e no Japão. Cada unidade tem seu cardápio local — mas todas seguem o mesmo manual: entrada, prato principal, sobremesa. A Abstract Factory é esse manual: define a família, cada unidade implementa do seu jeito.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Quando precisa criar <strong>famílias de objetos relacionados</strong> que devem ser usados juntos sem especificar classes concretas. Ex: temas Dark/Light onde botão, input e card mudam juntos.</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="cm">// Abstract factory interface</span>
+<span class="kw">abstract class</span> <span class="cl">DataSourceFactory</span> {
+  <span class="cl">UserDataSource</span> <span class="fn">createUserDataSource</span>();
+  <span class="cl">ProductDataSource</span> <span class="fn">createProductDataSource</span>();
+}
+<span class="cm">// Remote factory</span>
+<span class="kw">class</span> <span class="cl">RemoteDataSourceFactory</span> <span class="kw">implements</span> <span class="cl">DataSourceFactory</span> {
+  @override <span class="cl">UserDataSource</span> <span class="fn">createUserDataSource</span>() => <span class="cl">RemoteUserDataSource</span>();
+  @override <span class="cl">ProductDataSource</span> <span class="fn">createProductDataSource</span>() => <span class="cl">RemoteProductDataSource</span>();
+}
+<span class="cm">// Local factory (offline/mock)</span>
+<span class="kw">class</span> <span class="cl">LocalDataSourceFactory</span> <span class="kw">implements</span> <span class="cl">DataSourceFactory</span> {
+  @override <span class="cl">UserDataSource</span> <span class="fn">createUserDataSource</span>() => <span class="cl">LocalUserDataSource</span>();
+  @override <span class="cl">ProductDataSource</span> <span class="fn">createProductDataSource</span>() => <span class="cl">LocalProductDataSource</span>();
+}
+<span class="cm">// Swap the factory → everything changes together</span>
+<span class="kw">final</span> factory = isOffline ? <span class="cl">LocalDataSourceFactory</span>() : <span class="cl">RemoteDataSourceFactory</span>();</code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Abstract Factory = Fábrica de famílias.</strong> Cria grupos de objetos relacionados sem dizer qual classe exata usar. Troca tudo de uma vez.</p><div class="keys"><span class="key">família de objetos</span><span class="key">fábrica de fábricas</span><span class="key">troca em bloco</span><span class="key">tema/ambiente</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/abstract-factory" target="_blank">refactoring.guru/abstract-factory</a> · GoF Cap. 3</div>
+      </div>
+
+      <!-- FACTORY METHOD -->
+      <div class="pattern-card" id="factory-method">
+        <div class="pattern-card-header">
+          <div class="pattern-num">02</div>
+          <div class="pattern-title-block"><h3>Factory Method</h3><div class="pattern-subtitle">Delega criação para subclasses · Um tipo por vez</div></div>
+          <span class="p-badge lb-red">Criação</span>
+        </div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p>Uma <strong>loja de celulares</strong>: processo igual para todos — embalagem, entrega, ativação. Mas a Apple faz iPhone, Samsung faz Galaxy. Cada fabricante decide como criar — o processo geral é o mesmo.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Quando uma classe não sabe de antemão qual tipo de objeto criar, ou quer <strong>delegar a criação para subclasses</strong>. Mais simples que Abstract Factory — cria apenas um tipo.</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">Notification</span> { <span class="kw">void</span> <span class="fn">send</span>(<span class="cl">String</span> msg); }
+<span class="kw">class</span> <span class="cl">PushNotification</span> <span class="kw">implements</span> <span class="cl">Notification</span> {
+  @override <span class="kw">void</span> <span class="fn">send</span>(<span class="cl">String</span> msg) => print(<span class="st">'PUSH: $msg'</span>);
+}
+<span class="kw">abstract class</span> <span class="cl">NotificationSender</span> {
+  <span class="cl">Notification</span> <span class="fn">createNotification</span>(); <span class="cm">// ← factory method</span>
+  <span class="kw">void</span> <span class="fn">notify</span>(<span class="cl">String</span> msg) => <span class="fn">createNotification</span>().<span class="fn">send</span>(msg);
+}
+<span class="kw">class</span> <span class="cl">PushSender</span> <span class="kw">extends</span> <span class="cl">NotificationSender</span> {
+  @override <span class="cl">Notification</span> <span class="fn">createNotification</span>() => <span class="cl">PushNotification</span>();
+}</code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Factory Method = Método que cria.</strong> Superclasse define "preciso criar algo", subclasse decide o quê.</p><div class="keys"><span class="key">método criador</span><span class="key">subclasse decide</span><span class="key">um tipo só</span><span class="key">extensível</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/factory-method" target="_blank">refactoring.guru/factory-method</a></div>
+      </div>
+
+      <!-- SINGLETON -->
+      <div class="pattern-card" id="singleton">
+        <div class="pattern-card-header">
+          <div class="pattern-num">03</div>
+          <div class="pattern-title-block"><h3>Singleton</h3><div class="pattern-subtitle">Instância única global · Um só objeto</div></div>
+          <span class="p-badge lb-red">Criação</span>
+        </div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p>O <strong>presidente de um país</strong> — em dado momento existe apenas um. Qualquer cidadão que queira falar, fala com a mesma pessoa. Ou a <strong>impressora do escritório</strong> — todos acessam a mesma.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Quando precisa de exatamente <strong>uma instância</strong>: configurações globais, conexão com banco, log, cache. ⚠️ Cuidado: dificulta testes se abusado.</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">class</span> <span class="cl">AppConfig</span> {
+  <span class="kw">static final</span> <span class="cl">AppConfig</span> _instance = <span class="cl">AppConfig</span>._internal();
+  <span class="cl">AppConfig</span>._internal(); <span class="cm">// private constructor</span>
+  <span class="kw">factory</span> <span class="cl">AppConfig</span>() => _instance;
+  <span class="cl">String</span> apiUrl = <span class="st">'https://api.montebravo.com'</span>;
+}
+<span class="kw">final</span> a = <span class="cl">AppConfig</span>(); <span class="kw">final</span> b = <span class="cl">AppConfig</span>();
+print(identical(a, b)); <span class="cm">// true</span></code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Singleton = Um só.</strong> Garante uma única instância. Todo mundo acessa o mesmo objeto.</p><div class="keys"><span class="key">instância única</span><span class="key">acesso global</span><span class="key">construtor privado</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/singleton" target="_blank">refactoring.guru/singleton</a></div>
+      </div>
+
+      <!-- PROTOTYPE -->
+      <div class="pattern-card" id="prototype">
+        <div class="pattern-card-header">
+          <div class="pattern-num">04</div>
+          <div class="pattern-title-block"><h3>Prototype</h3><div class="pattern-subtitle">Clonar objetos existentes · Cópia sem depender da classe</div></div>
+          <span class="p-badge lb-red">Criação</span>
+        </div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p>A <strong>ovelha Dolly</strong> — clonada em vez de criada do zero. Ou <strong>Ctrl+C, Ctrl+V</strong> em um documento complexo: você copia e ajusta, sem recriar tudo.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Quando criar do zero é caro e você tem um objeto parecido na memória. <strong>Clone e ajuste</strong>. Muito usado em BLoC com <code>copyWith</code>.</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">class</span> <span class="cl">UserProfile</span> {
+  <span class="kw">final</span> <span class="cl">String</span> name, email, avatarUrl;
+  <span class="kw">const</span> <span class="cl">UserProfile</span>({required <span class="kw">this</span>.name, required <span class="kw">this</span>.email, required <span class="kw">this</span>.avatarUrl});
+  <span class="cm">// copyWith = Prototype in Dart!</span>
+  <span class="cl">UserProfile</span> <span class="fn">copyWith</span>({<span class="cl">String</span>? name, <span class="cl">String</span>? email, <span class="cl">String</span>? avatarUrl}) =>
+    <span class="cl">UserProfile</span>(name: name ?? <span class="kw">this</span>.name, email: email ?? <span class="kw">this</span>.email, avatarUrl: avatarUrl ?? <span class="kw">this</span>.avatarUrl);
+}
+<span class="cm">// In BLoC: newState = currentState.copyWith(name: 'Thabata');</span></code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Prototype = Clone.</strong> Copia objeto existente. Em Dart vira <code>copyWith</code> — adorado no BLoC!</p><div class="keys"><span class="key">clone</span><span class="key">copyWith</span><span class="key">cópia com variação</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/prototype" target="_blank">refactoring.guru/prototype</a></div>
+      </div>
+
+      <!-- BUILDER -->
+      <div class="pattern-card" id="builder">
+        <div class="pattern-card-header">
+          <div class="pattern-num">05</div>
+          <div class="pattern-title-block"><h3>Builder</h3><div class="pattern-subtitle">Construção passo a passo · Objetos complexos</div></div>
+          <span class="p-badge lb-red">Criação</span>
+        </div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p>Montar um <strong>hambúrguer no iFood</strong>: pão ✓, queijo ✓, bacon ✗, molho especial ✓. Você adiciona as partes que quer, na ordem certa. Builder monta objetos complexos passo a passo.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Quando um objeto tem <strong>muitos parâmetros opcionais</strong> e o construtor virou um monstro de 15 argumentos. Permite criar versões diferentes com o mesmo processo.</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">class</span> <span class="cl">ApiRequestBuilder</span> {
+  <span class="kw">late</span> <span class="cl">String</span> _url; <span class="cl">String</span> _method = <span class="st">'GET'</span>;
+  <span class="cl">Map</span>&lt;<span class="cl">String</span>,<span class="cl">String</span>&gt;? _headers; <span class="cl">Map</span>&lt;<span class="cl">String</span>,dynamic&gt;? _body;
+  <span class="cl">ApiRequestBuilder</span> <span class="fn">url</span>(<span class="cl">String</span> u) { _url=u; <span class="kw">return this</span>; }
+  <span class="cl">ApiRequestBuilder</span> <span class="fn">post</span>() { _method=<span class="st">'POST'</span>; <span class="kw">return this</span>; }
+  <span class="cl">ApiRequestBuilder</span> <span class="fn">withAuth</span>(<span class="cl">String</span> t) { _headers={<span class="st">'Authorization'</span>:<span class="st">'Bearer $t'</span>}; <span class="kw">return this</span>; }
+  <span class="cl">ApiRequestBuilder</span> <span class="fn">body</span>(<span class="cl">Map</span>&lt;<span class="cl">String</span>,dynamic&gt; b) { _body=b; <span class="kw">return this</span>; }
+  <span class="cl">ApiRequest</span> <span class="fn">build</span>() => <span class="cl">ApiRequest</span>._(_url,_method,_headers,_body);
+}
+<span class="cm">// Fluent usage:</span>
+<span class="kw">final</span> req = <span class="cl">ApiRequestBuilder</span>().<span class="fn">url</span>(<span class="st">'/suitability'</span>).<span class="fn">post</span>().<span class="fn">withAuth</span>(token).<span class="fn">build</span>();</code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Builder = Construção passo a passo.</strong> Fluent API. Resolve o construtor monstro. Cada etapa retorna o próprio builder. Termina com <code>.build()</code>.</p><div class="keys"><span class="key">passo a passo</span><span class="key">fluent API</span><span class="key">encadeamento</span><span class="key">.build()</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/builder" target="_blank">refactoring.guru/builder</a></div>
+      </div>
+
+      <!-- STRUCTURE -->
+      <div class="lib-section-header">
+        <h2 style="color:#2d6a4f">Padrões de Estrutura</h2>
+        <div class="lib-section-meta">7 patterns · Como objetos se conectam</div>
+      </div>
+      <div class="lib-section-intro">Definem <strong>como classes e objetos se compõem</strong> para formar estruturas maiores.</div>
+
+      <!-- ADAPTER -->
+      <div class="pattern-card" id="adapter">
+        <div class="pattern-card-header"><div class="pattern-num">06</div><div class="pattern-title-block"><h3>Adapter</h3><div class="pattern-subtitle">Tradutor de interfaces · Compatibiliza o incompatível</div></div><span class="p-badge lb-green">Estrutura</span></div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p>O <strong>adaptador de tomada de viagem</strong>. Plugue americano + tomada europeia = não encaixa. O adaptador faz a tradução sem modificar nenhum dos dois.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Quando quer usar uma classe existente mas sua <strong>interface não é compatível</strong>. Integração de libs de terceiros, sistemas legados, sem modificar código deles.</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">PaymentGateway</span> { <span class="cl">PaymentResult</span> <span class="fn">charge</span>(<span class="cl">double</span> amount); }
+<span class="kw">class</span> <span class="cl">ExternalPaymentService</span> {
+  <span class="cl">Map</span> <span class="fn">pay</span>(<span class="cl">double</span> a) => {<span class="st">'transaction_id'</span>:<span class="st">'TX123'</span>,<span class="st">'status_code'</span>:200};
+}
+<span class="kw">class</span> <span class="cl">PaymentAdapter</span> <span class="kw">implements</span> <span class="cl">PaymentGateway</span> {
+  <span class="kw">final</span> <span class="cl">ExternalPaymentService</span> _svc;
+  <span class="cl">PaymentAdapter</span>(<span class="kw">this</span>._svc);
+  @override <span class="cl">PaymentResult</span> <span class="fn">charge</span>(<span class="cl">double</span> a) {
+    <span class="kw">final</span> r = _svc.<span class="fn">pay</span>(a);
+    <span class="kw">return</span> <span class="cl">PaymentResult</span>(id: r[<span class="st">'transaction_id'</span>], success: r[<span class="st">'status_code'</span>]==200);
+  }
+}</code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Adapter = Tradutor.</strong> Converte interface de uma classe em outra. Pense no adaptador de tomada.</p><div class="keys"><span class="key">tradutor</span><span class="key">wrapper</span><span class="key">integração legado</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/adapter" target="_blank">refactoring.guru/adapter</a></div>
+      </div>
+
+      <!-- BRIDGE -->
+      <div class="pattern-card" id="bridge">
+        <div class="pattern-card-header"><div class="pattern-num">07</div><div class="pattern-title-block"><h3>Bridge</h3><div class="pattern-subtitle">Separa abstração da implementação · Duas hierarquias</div></div><span class="p-badge lb-green">Estrutura</span></div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Controle remoto + TV</strong>. O controle (abstração) pode ser básico ou avançado. A TV (implementação) pode ser Samsung ou LG. Qualquer controle funciona com qualquer TV via interface comum.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Quando quer evitar <strong>explosão de subclasses</strong>. N formas × M cores = N×M classes sem Bridge, N+M com Bridge. Composição &gt; herança.</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">NotifChannel</span> { <span class="kw">void</span> <span class="fn">send</span>(<span class="cl">String</span> t, <span class="cl">String</span> b); }
+<span class="kw">class</span> <span class="cl">FCMChannel</span> <span class="kw">implements</span> <span class="cl">NotifChannel</span> {
+  @override <span class="kw">void</span> <span class="fn">send</span>(<span class="cl">String</span> t, <span class="cl">String</span> b) => print(<span class="st">'FCM: $t'</span>);
+}
+<span class="kw">abstract class</span> <span class="cl">Notif</span> {
+  <span class="kw">final</span> <span class="cl">NotifChannel</span> channel; <span class="cm">// ← the bridge</span>
+  <span class="cl">Notif</span>(<span class="kw">this</span>.channel);
+  <span class="kw">void</span> <span class="fn">notify</span>();
+}
+<span class="kw">class</span> <span class="cl">AlertNotif</span> <span class="kw">extends</span> <span class="cl">Notif</span> {
+  <span class="cl">AlertNotif</span>(<span class="kw">super</span>.channel);
+  @override <span class="kw">void</span> <span class="fn">notify</span>() => channel.<span class="fn">send</span>(<span class="st">'Alerta'</span>, <span class="st">'Ação necessária'</span>);
+}</code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Bridge = Ponte.</strong> Separa "o quê" do "como". Evita explosão de subclasses. Composição &gt; herança.</p><div class="keys"><span class="key">separar abstração</span><span class="key">duas hierarquias</span><span class="key">composição</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/bridge" target="_blank">refactoring.guru/bridge</a></div>
+      </div>
+
+      <!-- COMPOSITE -->
+      <div class="pattern-card" id="composite">
+        <div class="pattern-card-header"><div class="pattern-num">08</div><div class="pattern-title-block"><h3>Composite</h3><div class="pattern-subtitle">Árvore de objetos · Trata parte e todo da mesma forma</div></div><span class="p-badge lb-green">Estrutura</span></div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Empresa → Departamentos → Equipes → Funcionários</strong>. Quando você pergunta "qual o custo total?", cada nível repassa para o próximo. Folha e galho respondem da mesma forma.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Estrutura <strong>hierárquica em árvore</strong> onde nós simples e compostos são tratados igual. Menus aninhados, sistema de arquivos, <strong>widgets Flutter</strong>!</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="cm">// All of Flutter uses Composite! Widget is the base component.</span>
+<span class="cm">// Column(children: [Text(), Row(children: [Icon(), Text()])]) = Composite</span>
+<span class="kw">abstract class</span> <span class="cl">UIComponent</span> { <span class="kw">void</span> <span class="fn">render</span>(); <span class="cl">double</span> <span class="fn">getHeight</span>(); }
+<span class="kw">class</span> <span class="cl">TextComp</span> <span class="kw">implements</span> <span class="cl">UIComponent</span> {
+  @override <span class="kw">void</span> <span class="fn">render</span>() => print(<span class="st">'Text'</span>);
+  @override <span class="cl">double</span> <span class="fn">getHeight</span>() => 20;
+}
+<span class="kw">class</span> <span class="cl">ContainerComp</span> <span class="kw">implements</span> <span class="cl">UIComponent</span> {
+  <span class="kw">final</span> children = &lt;<span class="cl">UIComponent</span>&gt;[];
+  <span class="kw">void</span> <span class="fn">add</span>(<span class="cl">UIComponent</span> c) => children.<span class="fn">add</span>(c);
+  @override <span class="kw">void</span> <span class="fn">render</span>() => children.<span class="fn">forEach</span>((c) => c.<span class="fn">render</span>());
+  @override <span class="cl">double</span> <span class="fn">getHeight</span>() => children.<span class="fn">fold</span>(0,(s,c) => s+c.<span class="fn">getHeight</span>());
+}</code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Composite = Árvore uniforme.</strong> Parte e todo tratados igual. Flutter inteiro usa isso!</p><div class="keys"><span class="key">árvore</span><span class="key">parte=todo</span><span class="key">widgets Flutter</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/composite" target="_blank">refactoring.guru/composite</a></div>
+      </div>
+
+      <!-- FLYWEIGHT -->
+      <div class="pattern-card" id="flyweight">
+        <div class="pattern-card-header"><div class="pattern-num">09</div><div class="pattern-title-block"><h3>Flyweight</h3><div class="pattern-subtitle">Compartilha estado · Economiza memória</div></div><span class="p-badge lb-green">Estrutura</span></div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Livro em biblioteca</strong>: muitas pessoas leem O Senhor dos Anéis, mas existe um exemplar. Todos compartilham o mesmo conteúdo — o que muda é quem está lendo.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p><strong>Milhares de objetos similares</strong> consumindo muita memória. Em Flutter: <code>const</code> widgets fazem isso automaticamente — reutiliza a mesma instância!</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="cm">// Flutter already uses Flyweight with const widgets!</span>
+<span class="cm">// const Text('hello') → reuses the same instance</span>
+<span class="kw">class</span> <span class="cl">IconFactory</span> {
+  <span class="kw">static final</span> _cache = &lt;<span class="cl">String</span>, <span class="cl">IconData</span>&gt;{};
+  <span class="kw">static</span> <span class="cl">IconData</span> <span class="fn">get</span>(<span class="cl">String</span> key, <span class="cl">IconData</span> data) =>
+    _cache.<span class="fn">putIfAbsent</span>(key, () => data);
+}
+<span class="cm">// Intrinsic state (shared): iconData, default color</span>
+<span class="cm">// Extrinsic state (per-instance): size, position in list</span></code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Flyweight = Compartilha para economizar.</strong> Separa intrínseco (compartilhado) do extrínseco (único). <code>const</code> widgets = Flyweight automático no Flutter.</p><div class="keys"><span class="key">compartilhar</span><span class="key">economizar memória</span><span class="key">const widgets</span><span class="key">cache</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/flyweight" target="_blank">refactoring.guru/flyweight</a></div>
+      </div>
+
+      <!-- FACADE -->
+      <div class="pattern-card" id="facade">
+        <div class="pattern-card-header"><div class="pattern-num">10</div><div class="pattern-title-block"><h3>Facade</h3><div class="pattern-subtitle">Interface simples para subsistema complexo</div></div><span class="p-badge lb-green">Estrutura</span></div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Botão "ligar" do home theater</strong>: por trás liga o projetor, baixa a tela, acende as luzes, ativa o som. Você só aperta um botão. A Facade esconde toda complexidade.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Subsistema complexo com muitas classes. Ofereça uma <strong>interface simples</strong>. Services no Clean Architecture são Facades! Encapsula SDKs de terceiros.</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">class</span> <span class="cl">AuthFacade</span> {
+  <span class="kw">final</span> <span class="cl">FirebaseAuth</span> _auth; <span class="kw">final</span> <span class="cl">Analytics</span> _analytics; <span class="kw">final</span> <span class="cl">CacheService</span> _cache;
+  <span class="cl">AuthFacade</span>(<span class="kw">this</span>._auth, <span class="kw">this</span>._analytics, <span class="kw">this</span>._cache);
+  <span class="kw">Future</span>&lt;<span class="cl">User</span>?&gt; <span class="fn">signIn</span>(<span class="cl">String</span> email, <span class="cl">String</span> pass) <span class="kw">async</span> {
+    <span class="kw">final</span> user = <span class="kw">await</span> _auth.<span class="fn">signIn</span>(email, pass);
+    <span class="kw">if</span> (user != <span class="kw">null</span>) {
+      <span class="kw">await</span> _analytics.<span class="fn">track</span>(<span class="st">'login'</span>);
+      <span class="kw">await</span> _cache.<span class="fn">saveUser</span>(user);
+    }
+    <span class="kw">return</span> user;
+  }
+}
+<span class="cm">// BLoC only calls authFacade.signIn() — no knowledge of internals</span></code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Facade = Fachada.</strong> Interface simples para complexidade interna. Services do Clean Architecture são Facades.</p><div class="keys"><span class="key">simplificar</span><span class="key">esconder complexidade</span><span class="key">service layer</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/facade" target="_blank">refactoring.guru/facade</a></div>
+      </div>
+
+      <!-- PROXY -->
+      <div class="pattern-card" id="proxy">
+        <div class="pattern-card-header"><div class="pattern-num">11</div><div class="pattern-title-block"><h3>Proxy</h3><div class="pattern-subtitle">Substituto que controla acesso ao objeto real</div></div><span class="p-badge lb-green">Estrutura</span></div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Advogado representando o cliente</strong>. O advogado vai às audiências no lugar, filtra e controla o que chega ao cliente. Cartão de crédito é um proxy da sua conta bancária.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Adicionar <strong>cache, log, lazy loading, controle de acesso</strong> sem modificar o objeto real. CachedNetworkImage do Flutter usa este padrão!</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">ImageLoader</span> { <span class="kw">Future</span>&lt;<span class="cl">Uint8List</span>&gt; <span class="fn">load</span>(<span class="cl">String</span> url); }
+<span class="kw">class</span> <span class="cl">RemoteImageLoader</span> <span class="kw">implements</span> <span class="cl">ImageLoader</span> {
+  @override <span class="kw">Future</span>&lt;<span class="cl">Uint8List</span>&gt; <span class="fn">load</span>(<span class="cl">String</span> url) <span class="kw">async</span> => <span class="kw">await</span> http.<span class="fn">get</span>(url);
+}
+<span class="kw">class</span> <span class="cl">CachedImageProxy</span> <span class="kw">implements</span> <span class="cl">ImageLoader</span> {
+  <span class="kw">final</span> _real = <span class="cl">RemoteImageLoader</span>(); <span class="kw">final</span> _cache = &lt;<span class="cl">String</span>,<span class="cl">Uint8List</span>&gt;{};
+  @override <span class="kw">Future</span>&lt;<span class="cl">Uint8List</span>&gt; <span class="fn">load</span>(<span class="cl">String</span> url) <span class="kw">async</span> {
+    <span class="kw">if</span> (_cache.<span class="fn">containsKey</span>(url)) <span class="kw">return</span> _cache[url]!;
+    <span class="kw">return</span> _cache[url] = <span class="kw">await</span> _real.<span class="fn">load</span>(url);
+  }
+}</code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Proxy = Intermediário.</strong> Fica na frente do real. Adiciona cache, log, auth. Mesma interface. CachedNetworkImage é um Proxy.</p><div class="keys"><span class="key">intermediário</span><span class="key">cache proxy</span><span class="key">lazy loading</span><span class="key">mesma interface</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/proxy" target="_blank">refactoring.guru/proxy</a></div>
+      </div>
+
+      <!-- DECORATOR -->
+      <div class="pattern-card" id="decorator">
+        <div class="pattern-card-header"><div class="pattern-num">12</div><div class="pattern-title-block"><h3>Decorator</h3><div class="pattern-subtitle">Adiciona comportamento sem alterar a classe · Embrulha</div></div><span class="p-badge lb-green">Estrutura</span></div>
+        <div class="pattern-grid">
+          <div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Café com leite com açúcar com chantilly</strong>. Cada camada adiciona algo sem mudar o café original. Empilhável, reversível.</p></div>
+          <div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Adicionar comportamentos <strong>dinamicamente sem herança</strong>. Em Flutter: Padding(Container(Text())) = Decorator! Empilhável: Log(Cache(Remote())).</p></div>
+          <div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">UserRepo</span> { <span class="kw">Future</span>&lt;<span class="cl">User</span>&gt; <span class="fn">getUser</span>(<span class="cl">String</span> id); }
+<span class="kw">class</span> <span class="cl">RemoteUserRepo</span> <span class="kw">implements</span> <span class="cl">UserRepo</span> {
+  @override <span class="kw">Future</span>&lt;<span class="cl">User</span>&gt; <span class="fn">getUser</span>(<span class="cl">String</span> id) <span class="kw">async</span> => fetchFromApi(id);
+}
+<span class="kw">class</span> <span class="cl">LoggingUserRepo</span> <span class="kw">implements</span> <span class="cl">UserRepo</span> {
+  <span class="kw">final</span> <span class="cl">UserRepo</span> _wrapped;
+  <span class="cl">LoggingUserRepo</span>(<span class="kw">this</span>._wrapped);
+  @override <span class="kw">Future</span>&lt;<span class="cl">User</span>&gt; <span class="fn">getUser</span>(<span class="cl">String</span> id) <span class="kw">async</span> {
+    print(<span class="st">'[LOG] getUser: $id'</span>);
+    <span class="kw">return</span> <span class="kw">await</span> _wrapped.<span class="fn">getUser</span>(id);
+  }
+}
+<span class="cm">// Logging(Cache(Remote())) — stack decorators</span></code></div>
+        </div>
+        <div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Decorator = Embrulha e adiciona.</strong> Sem herança. Empilhável. Widgets Flutter são Decorators!</p><div class="keys"><span class="key">embrulha</span><span class="key">empilhável</span><span class="key">sem herança</span><span class="key">widgets Flutter</span></div></div>
+        <div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/decorator" target="_blank">refactoring.guru/decorator</a></div>
+      </div>
+
+      <!-- BEHAVIOR -->
+      <div class="lib-section-header">
+        <h2 style="color:#1d3557">Padrões de Comportamento</h2>
+        <div class="lib-section-meta">11 patterns · Como objetos se comunicam</div>
+      </div>
+      <div class="lib-section-intro">Definem <strong>como os objetos interagem e distribuem responsabilidades</strong>.</div>
+
+      <div class="pattern-card" id="chain"><div class="pattern-card-header"><div class="pattern-num">13</div><div class="pattern-title-block"><h3>Chain of Responsibility</h3><div class="pattern-subtitle">Cadeia de handlers · Passa até alguém tratar</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Suporte técnico em níveis</strong>: nível 1 não resolve → passa para nível 2 → especialista. O problema é tratado pelo primeiro que souber.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Quando mais de um objeto pode tratar uma requisição. <strong>Middlewares, validações em cascata, filtros</strong>.</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">Validator</span> {
+  <span class="cl">Validator</span>? next;
+  <span class="cl">String</span>? <span class="fn">validate</span>(<span class="cl">String</span> v) => next?.<span class="fn">validate</span>(v);
+}
+<span class="kw">class</span> <span class="cl">RequiredValidator</span> <span class="kw">extends</span> <span class="cl">Validator</span> {
+  @override <span class="cl">String</span>? <span class="fn">validate</span>(<span class="cl">String</span> v) =>
+    v.<span class="fn">isEmpty</span> ? <span class="st">'Obrigatório'</span> : <span class="kw">super</span>.<span class="fn">validate</span>(v);
+}
+<span class="kw">class</span> <span class="cl">EmailValidator</span> <span class="kw">extends</span> <span class="cl">Validator</span> {
+  @override <span class="cl">String</span>? <span class="fn">validate</span>(<span class="cl">String</span> v) =>
+    !v.<span class="fn">contains</span>(<span class="st">'@'</span>) ? <span class="st">'Email inválido'</span> : <span class="kw">super</span>.<span class="fn">validate</span>(v);
+}
+<span class="kw">final</span> chain = <span class="cl">RequiredValidator</span>()..next = <span class="cl">EmailValidator</span>();</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Chain = Cadeia de tratamento.</strong> Cada elo tenta — se não souber, passa. Middlewares, validações.</p><div class="keys"><span class="key">cadeia</span><span class="key">passa para o próximo</span><span class="key">middleware</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/chain-of-responsibility" target="_blank">refactoring.guru/chain-of-responsibility</a></div></div>
+
+      <div class="pattern-card" id="command"><div class="pattern-card-header"><div class="pattern-num">14</div><div class="pattern-title-block"><h3>Command</h3><div class="pattern-subtitle">Encapsula ação como objeto · Undo/Redo</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Ctrl+Z</strong>. Cada ação é salva como objeto. Para desfazer, executa o inverso. Pedido de restaurante: garçom anota (encapsula), cozinheiro executa depois.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p><strong>Undo/redo, filas de operações, log de ações.</strong> No BLoC, cada Event é um Command encapsulado!</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">Command</span> { <span class="kw">void</span> <span class="fn">execute</span>(); <span class="kw">void</span> <span class="fn">undo</span>(); }
+<span class="kw">class</span> <span class="cl">AddTextCmd</span> <span class="kw">implements</span> <span class="cl">Command</span> {
+  <span class="kw">final</span> <span class="cl">TextCtrl</span> ctrl; <span class="kw">final</span> <span class="cl">String</span> text;
+  <span class="cl">AddTextCmd</span>(<span class="kw">this</span>.ctrl, <span class="kw">this</span>.text);
+  @override <span class="kw">void</span> <span class="fn">execute</span>() => ctrl.<span class="fn">append</span>(text);
+  @override <span class="kw">void</span> <span class="fn">undo</span>() => ctrl.<span class="fn">remove</span>(text.<span class="fn">length</span>);
+}
+<span class="kw">class</span> <span class="cl">CmdHistory</span> {
+  <span class="kw">final</span> _h = &lt;<span class="cl">Command</span>&gt;[];
+  <span class="kw">void</span> <span class="fn">execute</span>(<span class="cl">Command</span> c) { c.<span class="fn">execute</span>(); _h.<span class="fn">add</span>(c); }
+  <span class="kw">void</span> <span class="fn">undo</span>() { <span class="kw">if</span>(_h.<span class="fn">isNotEmpty</span>) _h.<span class="fn">removeLast</span>().<span class="fn">undo</span>(); }
+}</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Command = Ação como objeto.</strong> Ctrl+Z. Filas. BLoC Events são Commands!</p><div class="keys"><span class="key">undo/redo</span><span class="key">fila de ações</span><span class="key">BLoC events</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/command" target="_blank">refactoring.guru/command</a></div></div>
+
+      <div class="pattern-card" id="mediator"><div class="pattern-card-header"><div class="pattern-num">15</div><div class="pattern-title-block"><h3>Mediator</h3><div class="pattern-subtitle">Comunicação centralizada · Torre de controle</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Torre de controle do aeroporto</strong>. Aviões não se comunicam diretamente — todos falam com a torre. Sem torre cada avião precisaria saber a posição de todos os outros.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Muitos objetos com comunicação complexa criando alto acoplamento. <strong>EventBus, formulários com campos dependentes.</strong></p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">class</span> <span class="cl">EventBus</span> {
+  <span class="kw">static final</span> _i = <span class="cl">EventBus</span>._(); <span class="cl">EventBus</span>._(); <span class="kw">factory</span> <span class="cl">EventBus</span>() => _i;
+  <span class="kw">final</span> _streams = &lt;<span class="cl">Type</span>, <span class="cl">StreamController</span>&gt;{};
+  <span class="kw">void</span> <span class="fn">emit</span>&lt;T&gt;(T e) => _streams[T]?.<span class="fn">add</span>(e);
+  <span class="cl">Stream</span>&lt;T&gt; <span class="fn">on</span>&lt;T&gt;() {
+    _streams[T] ??= <span class="cl">StreamController</span>.<span class="fn">broadcast</span>();
+    <span class="kw">return</span> _streams[T]!.stream <span class="kw">as</span> <span class="cl">Stream</span>&lt;T&gt;;
+  }
+}
+<span class="cm">// AuthBloc → emits; ProfileBloc → listens. No direct references.</span>
+<span class="cl">EventBus</span>().<span class="fn">emit</span>(<span class="cl">UserLoggedIn</span>(<span class="st">'123'</span>));
+<span class="cl">EventBus</span>().<span class="fn">on</span>&lt;<span class="cl">UserLoggedIn</span>&gt;().<span class="fn">listen</span>((e) => <span class="fn">loadProfile</span>(e.id));</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Mediator = Torre de controle.</strong> Centraliza comunicação. EventBus = Mediator.</p><div class="keys"><span class="key">centraliza</span><span class="key">event bus</span><span class="key">desacoplamento</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/mediator" target="_blank">refactoring.guru/mediator</a></div></div>
+
+      <div class="pattern-card" id="observer"><div class="pattern-card-header"><div class="pattern-num">16</div><div class="pattern-title-block"><h3>Observer</h3><div class="pattern-subtitle">Notifica interessados quando algo muda · Pub/Sub</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Newsletter / canal do YouTube</strong>. Você se inscreve. Quando algo novo aparece, todos os inscritos são notificados automaticamente.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Mudanças em um objeto devem <strong>notificar outros automaticamente</strong>. Base da programação reativa. <strong>Streams, BLoC, ChangeNotifier</strong> = Observer!</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="cm">// Dart Streams = native Observer!</span>
+<span class="cm">// StreamController = Publisher | StreamSubscription = Observer</span>
+<span class="kw">mixin</span> <span class="cl">Observable</span>&lt;T&gt; {
+  <span class="kw">final</span> _obs = &lt;<span class="kw">void</span> <span class="cl">Function</span>(T)&gt;[];
+  <span class="kw">void</span> <span class="fn">subscribe</span>(<span class="kw">void</span> <span class="cl">Function</span>(T) fn) => _obs.<span class="fn">add</span>(fn);
+  <span class="kw">void</span> <span class="fn">unsubscribe</span>(<span class="kw">void</span> <span class="cl">Function</span>(T) fn) => _obs.<span class="fn">remove</span>(fn);
+  <span class="kw">void</span> <span class="fn">notify</span>(T v) => _obs.<span class="fn">forEach</span>((fn) => <span class="fn">fn</span>(v));
+}
+<span class="kw">class</span> <span class="cl">CartStore</span> <span class="kw">with</span> <span class="cl">Observable</span>&lt;<span class="cl">List</span>&lt;<span class="cl">CartItem</span>&gt;&gt; {
+  <span class="kw">final</span> _items = &lt;<span class="cl">CartItem</span>&gt;[];
+  <span class="kw">void</span> <span class="fn">add</span>(<span class="cl">CartItem</span> i) { _items.<span class="fn">add</span>(i); <span class="fn">notify</span>(_items); }
+}</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Observer = Assinar notificações.</strong> Publisher avisa todos os inscritos. BLoC, Streams, ChangeNotifier = Observer!</p><div class="keys"><span class="key">pub/sub</span><span class="key">reativo</span><span class="key">Stream/BLoC</span><span class="key">ChangeNotifier</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/observer" target="_blank">refactoring.guru/observer</a></div></div>
+
+      <div class="pattern-card" id="iterator"><div class="pattern-card-header"><div class="pattern-num">17</div><div class="pattern-title-block"><h3>Iterator</h3><div class="pattern-subtitle">Percorre coleção sem expor estrutura interna</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Controle remoto trocando canais</strong>: avançar, voltar, ver atual. Você não sabe como os canais estão armazenados — só usa os botões.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Percorrer coleções sem expor estrutura. Em Dart <strong>Iterable e for-in</strong> já implementam nativamente. Raramente precisa criar manualmente.</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="cm">// Dart already has a native Iterator — for-in, .map(), .where() use it under the hood</span>
+<span class="kw">class</span> <span class="cl">ActiveItems</span>&lt;T extends <span class="cl">HasActive</span>&gt; <span class="kw">extends</span> <span class="cl">Iterable</span>&lt;T&gt; {
+  <span class="kw">final</span> <span class="cl">List</span>&lt;T&gt; _all;
+  <span class="cl">ActiveItems</span>(<span class="kw">this</span>._all);
+  @override <span class="cl">Iterator</span>&lt;T&gt; <span class="kw">get</span> iterator =>
+    _all.<span class="fn">where</span>((i) => i.isActive).<span class="fn">iterator</span>;
+}
+<span class="kw">for</span> (<span class="kw">final</span> p <span class="kw">in</span> <span class="cl">ActiveItems</span>(allProducts)) { print(p.name); }</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Iterator = Percorrer sem saber como guarda.</strong> Em Dart: for-in, .map(), .where() = Iterator automático.</p><div class="keys"><span class="key">percorrer</span><span class="key">Iterable Dart</span><span class="key">for-in</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/iterator" target="_blank">refactoring.guru/iterator</a></div></div>
+
+      <div class="pattern-card" id="interpreter"><div class="pattern-card-header"><div class="pattern-num">18</div><div class="pattern-title-block"><h3>Interpreter</h3><div class="pattern-subtitle">Interpreta linguagem ou gramática · Parser</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Calculadora</strong>: você digita <code>2+3*4</code>, ela interpreta as regras (multiplicação antes) e retorna resultado. Tradutor simultâneo também.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Interpretar <strong>expressões de linguagem simples</strong>: filtros de busca, regras de negócio configuráveis, parsers de fórmulas. Menos comum — evite para linguagens complexas.</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">Expression</span> { <span class="kw">bool</span> <span class="fn">interpret</span>(<span class="cl">Map</span>&lt;<span class="cl">String</span>,dynamic&gt; ctx); }
+<span class="kw">class</span> <span class="cl">EqualsExpr</span> <span class="kw">implements</span> <span class="cl">Expression</span> {
+  <span class="kw">final</span> <span class="cl">String</span> key; <span class="kw">final</span> dynamic value;
+  <span class="cl">EqualsExpr</span>(<span class="kw">this</span>.key, <span class="kw">this</span>.value);
+  @override <span class="kw">bool</span> <span class="fn">interpret</span>(<span class="cl">Map</span>&lt;<span class="cl">String</span>,dynamic&gt; ctx) => ctx[key]==value;
+}
+<span class="kw">class</span> <span class="cl">AndExpr</span> <span class="kw">implements</span> <span class="cl">Expression</span> {
+  <span class="kw">final</span> <span class="cl">Expression</span> l, r;
+  <span class="cl">AndExpr</span>(<span class="kw">this</span>.l, <span class="kw">this</span>.r);
+  @override <span class="kw">bool</span> <span class="fn">interpret</span>(<span class="cl">Map</span>&lt;<span class="cl">String</span>,dynamic&gt; ctx) => l.<span class="fn">interpret</span>(ctx)&&r.<span class="fn">interpret</span>(ctx);
+}
+<span class="cm">// "active==true AND profile=='aggressive'"</span>
+<span class="kw">final</span> rule = <span class="cl">AndExpr</span>(<span class="cl">EqualsExpr</span>(<span class="st">'ativo'</span>,<span class="kw">true</span>),<span class="cl">EqualsExpr</span>(<span class="st">'perfil'</span>,<span class="st">'agressivo'</span>));</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Interpreter = Interpreta linguagem.</strong> Gramática simples, filtros, regras configuráveis. Menos comum no dia a dia.</p><div class="keys"><span class="key">parser</span><span class="key">gramática</span><span class="key">regras de negócio</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/interpreter" target="_blank">refactoring.guru/interpreter</a></div></div>
+
+      <div class="pattern-card" id="memento"><div class="pattern-card-header"><div class="pattern-num">19</div><div class="pattern-title-block"><h3>Memento</h3><div class="pattern-subtitle">Salva e restaura estado · Snapshot</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Checkpoint de videogame</strong>. Salva o estado atual (vida, posição, itens). Se morrer, volta. Histórico de versões do Google Docs também.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p><strong>Salvar e restaurar estado</strong> sem violar encapsulamento. Drafts de formulário, wizards multi-etapa, undo de editores.</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">class</span> <span class="cl">FormMemento</span> {
+  <span class="kw">final</span> <span class="cl">Map</span>&lt;<span class="cl">String</span>,dynamic&gt; _snap;
+  <span class="cl">FormMemento</span>(<span class="cl">Map</span>&lt;<span class="cl">String</span>,dynamic&gt; s) : _snap = <span class="cl">Map</span>.<span class="fn">from</span>(s);
+  <span class="cl">Map</span>&lt;<span class="cl">String</span>,dynamic&gt; <span class="fn">restore</span>() => <span class="cl">Map</span>.<span class="fn">from</span>(_snap);
+}
+<span class="kw">class</span> <span class="cl">SuitabilityForm</span> {
+  <span class="kw">var</span> _data = &lt;<span class="cl">String</span>,dynamic&gt;{};
+  <span class="kw">void</span> <span class="fn">update</span>(<span class="cl">String</span> k, dynamic v) => _data[k]=v;
+  <span class="cl">FormMemento</span> <span class="fn">save</span>() => <span class="cl">FormMemento</span>(_data);
+  <span class="kw">void</span> <span class="fn">restore</span>(<span class="cl">FormMemento</span> m) => _data = m.<span class="fn">restore</span>();
+}</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Memento = Snapshot/Checkpoint.</strong> Tira "foto" do estado. Guarda estado, não ação (diferente do Command).</p><div class="keys"><span class="key">snapshot</span><span class="key">checkpoint</span><span class="key">draft</span><span class="key">restaurar</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/memento" target="_blank">refactoring.guru/memento</a></div></div>
+
+      <div class="pattern-card" id="state"><div class="pattern-card-header"><div class="pattern-num">20</div><div class="pattern-title-block"><h3>State</h3><div class="pattern-subtitle">Comportamento muda com o estado · Máquina de estados</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Status de pedido</strong>: Pendente → Em preparo → Saiu para entrega → Entregue. Em cada estado, ações disponíveis mudam. No Pendente você cancela. Em Saiu não pode mais.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Objeto muda <strong>comportamento conforme estado</strong>. Elimina if/else gigante. <strong>BLoC states, sealed classes Dart 3</strong> são perfeitos!</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="cm">// Dart 3 — sealed class is ideal for the State pattern</span>
+<span class="kw">sealed class</span> <span class="cl">AuthState</span> {}
+<span class="kw">class</span> <span class="cl">Unauthenticated</span> <span class="kw">extends</span> <span class="cl">AuthState</span> {}
+<span class="kw">class</span> <span class="cl">Authenticating</span> <span class="kw">extends</span> <span class="cl">AuthState</span> {}
+<span class="kw">class</span> <span class="cl">Authenticated</span> <span class="kw">extends</span> <span class="cl">AuthState</span> { <span class="kw">final</span> <span class="cl">String</span> userId; <span class="cl">Authenticated</span>(<span class="kw">this</span>.userId); }
+
+<span class="cm">// Exhaustive switch — compiler enforces all states</span>
+<span class="kw">switch</span> (state) {
+  <span class="kw">case</span> <span class="cl">Unauthenticated</span>(): <span class="kw">return</span> <span class="cl">LoginPage</span>();
+  <span class="kw">case</span> <span class="cl">Authenticating</span>(): <span class="kw">return</span> <span class="cl">LoadingPage</span>();
+  <span class="kw">case</span> <span class="cl">Authenticated</span>(:<span class="kw">final</span> userId): <span class="kw">return</span> <span class="cl">HomePage</span>(userId);
+}</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>State = Comportamento por estado.</strong> Elimina if/else. BLoC states + sealed classes Dart 3 = perfeito.</p><div class="keys"><span class="key">máquina de estados</span><span class="key">BLoC states</span><span class="key">sealed class</span><span class="key">sem if/else</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/state" target="_blank">refactoring.guru/state</a></div></div>
+
+      <div class="pattern-card" id="strategy"><div class="pattern-card-header"><div class="pattern-num">21</div><div class="pattern-title-block"><h3>Strategy</h3><div class="pattern-subtitle">Algoritmos intercambiáveis · Troca o "como"</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Formas de pagamento</strong>: Pix, cartão, boleto. Mesmo objetivo (pagar), estratégia diferente. GPS: mais rápido / menos pedágio / mais barato — mesmo destino.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Vários <strong>algoritmos para a mesma coisa</strong>, trocáveis em runtime. Elimina condicionais para escolher algoritmo. Ordenação, validação, cálculo de frete.</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">SuitabilityStrategy</span> {
+  <span class="cl">String</span> <span class="fn">calculate</span>(<span class="cl">Map</span>&lt;<span class="cl">String</span>,int&gt; answers);
+}
+<span class="kw">class</span> <span class="cl">SimpleStrategy</span> <span class="kw">implements</span> <span class="cl">SuitabilityStrategy</span> {
+  @override <span class="cl">String</span> <span class="fn">calculate</span>(<span class="cl">Map</span>&lt;<span class="cl">String</span>,int&gt; a) {
+    <span class="kw">final</span> score = a.values.<span class="fn">fold</span>(0,(s,v)=>s+v);
+    <span class="kw">return</span> score&lt;30?<span class="st">'Conservador'</span>:score&lt;60?<span class="st">'Moderado'</span>:<span class="st">'Arrojado'</span>;
+  }
+}
+<span class="kw">class</span> <span class="cl">SuitabilityEngine</span> {
+  <span class="cl">SuitabilityStrategy</span> _strategy;
+  <span class="cl">SuitabilityEngine</span>(<span class="kw">this</span>._strategy);
+  <span class="kw">void</span> <span class="fn">setStrategy</span>(<span class="cl">SuitabilityStrategy</span> s) => _strategy = s;
+  <span class="cl">String</span> <span class="fn">run</span>(<span class="cl">Map</span>&lt;<span class="cl">String</span>,int&gt; a) => _strategy.<span class="fn">calculate</span>(a);
+} <span class="cm">// Great fit for Advisor Insights! 🎯</span></code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Strategy = Troca o algoritmo.</strong> Família de formas de fazer algo, trocável em runtime. Elimina if/else para escolher algoritmo.</p><div class="keys"><span class="key">intercambiável</span><span class="key">troca em runtime</span><span class="key">sem if/else</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/strategy" target="_blank">refactoring.guru/strategy</a></div></div>
+
+      <div class="pattern-card" id="template"><div class="pattern-card-header"><div class="pattern-num">22</div><div class="pattern-title-block"><h3>Template Method</h3><div class="pattern-subtitle">Esqueleto fixo com partes customizáveis</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Receita de bolo</strong>: sempre misturar, assar, decorar — nessa ordem. O que muda é o sabor. A receita base é o template, os ingredientes específicos são os passos customizáveis.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Algoritmo com <strong>etapas fixas</strong> mas algumas variam entre subclasses. Evita duplicação. Processamento de relatórios, onboarding, importação de dados.</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">ReportGenerator</span> {
+  <span class="cm">// Template Method — fixed skeleton</span>
+  <span class="kw">void</span> <span class="fn">generate</span>() { <span class="fn">fetchData</span>(); <span class="fn">processData</span>(); <span class="fn">formatOutput</span>(); <span class="fn">export</span>(); }
+  <span class="kw">void</span> <span class="fn">fetchData</span>(); <span class="kw">void</span> <span class="fn">processData</span>(); <span class="kw">void</span> <span class="fn">formatOutput</span>();
+  <span class="kw">void</span> <span class="fn">export</span>() => print(<span class="st">'Exportando PDF...'</span>); <span class="cm">// default hook</span>
+}
+<span class="kw">class</span> <span class="cl">SuitabilityReport</span> <span class="kw">extends</span> <span class="cl">ReportGenerator</span> {
+  @override <span class="kw">void</span> <span class="fn">fetchData</span>() => print(<span class="st">'Buscando dados de suitability'</span>);
+  @override <span class="kw">void</span> <span class="fn">processData</span>() => print(<span class="st">'Calculando perfil'</span>);
+  @override <span class="kw">void</span> <span class="fn">formatOutput</span>() => print(<span class="st">'Formatando gráfico'</span>);
+}</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Template Method = Receita com etapas.</strong> Esqueleto fixo na superclasse, subclasses preenchem os passos específicos.</p><div class="keys"><span class="key">esqueleto fixo</span><span class="key">etapas customizáveis</span><span class="key">hooks</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/template-method" target="_blank">refactoring.guru/template-method</a></div></div>
+
+      <div class="pattern-card" id="visitor"><div class="pattern-card-header"><div class="pattern-num">23</div><div class="pattern-title-block"><h3>Visitor</h3><div class="pattern-subtitle">Operação nova sem modificar as classes</div></div><span class="p-badge lb-blue">Comportamento</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Auditor fiscal visitando empresas</strong>. O auditor faz seu trabalho em cada empresa sem as empresas mudarem para recebê-lo. É o auditor que sabe o que fazer em cada tipo.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Adicionar <strong>operações sem modificar classes</strong>. Estrutura estável, operações variáveis. Exportações em múltiplos formatos, análise de AST.</p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">PortfolioItem</span> { <span class="kw">void</span> <span class="fn">accept</span>(<span class="cl">PortfolioVisitor</span> v); }
+<span class="kw">class</span> <span class="cl">Stock</span> <span class="kw">implements</span> <span class="cl">PortfolioItem</span> {
+  <span class="kw">final</span> <span class="cl">String</span> ticker; <span class="kw">final</span> <span class="cl">double</span> qty;
+  <span class="cl">Stock</span>(<span class="kw">this</span>.ticker, <span class="kw">this</span>.qty);
+  @override <span class="kw">void</span> <span class="fn">accept</span>(<span class="cl">PortfolioVisitor</span> v) => v.<span class="fn">visitStock</span>(<span class="kw">this</span>);
+}
+<span class="kw">abstract class</span> <span class="cl">PortfolioVisitor</span> { <span class="kw">void</span> <span class="fn">visitStock</span>(<span class="cl">Stock</span> s); }
+<span class="kw">class</span> <span class="cl">TaxVisitor</span> <span class="kw">implements</span> <span class="cl">PortfolioVisitor</span> {
+  @override <span class="kw">void</span> <span class="fn">visitStock</span>(<span class="cl">Stock</span> s) => print(<span class="st">'IR: ${s.qty*0.15}'</span>);
+}
+<span class="cm">// Add PdfVisitor, JsonVisitor without touching Stock</span></code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Visitor = Adiciona operação de fora.</strong> Estrutura estável, operações variáveis. accept/visit. Sem modificar as classes originais.</p><div class="keys"><span class="key">operação externa</span><span class="key">accept/visit</span><span class="key">exportações</span></div></div><div class="fonte">📚 <a href="https://refactoring.guru/pt-br/design-patterns/visitor" target="_blank">refactoring.guru/visitor</a></div></div>
+
+      <!-- POEAA -->
+      <div class="lib-section-header">
+        <h2>POEAA <em style="font-style:italic;color:var(--muted);font-size:18px">— Martin Fowler</em></h2>
+        <div class="lib-section-meta">Patterns of Enterprise Application Architecture · 2002</div>
+      </div>
+      <div class="lib-section-intro">Padrões para aplicações empresariais. Enquanto o GoF foca em design de objetos, POEAA foca em arquitetura de sistemas de negócio. Fonte: <a href="https://martinfowler.com/eaaCatalog/" target="_blank" style="color:var(--accent-b)">martinfowler.com/eaaCatalog</a></div>
+
+      <div class="pattern-card" id="repository"><div class="pattern-card-header"><div class="pattern-num">24</div><div class="pattern-title-block"><h3>Repository</h3><div class="pattern-subtitle">Camada de abstração de dados · Esconde a fonte</div></div><span class="p-badge" style="background:var(--muted);color:white">POEAA</span></div><div class="pattern-grid"><div class="pblock"><div class="pblock-label pl-leigo">☕ Dia a Dia</div><p><strong>Bibliotecário</strong>. Você pede "quero o livro X". Não importa se está na prateleira A, no depósito, sendo digitalizado — o bibliotecário busca e entrega. Você não sabe onde estava.</p></div><div class="pblock"><div class="pblock-label pl-when">🎯 Quando Usar</div><p>Isolar <strong>camada de dados</strong> do resto do app. Base do Clean Architecture. A lógica de negócio não sabe de onde vêm os dados. <strong>Facilita testes com mock.</strong></p></div><div class="pblock full-col"><div class="pblock-label pl-flutter">🐦 Flutter / Dart</div><code><span class="kw">abstract class</span> <span class="cl">AdvisorRepository</span> {
+  <span class="kw">Future</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Client</span>&gt;&gt; <span class="fn">getClients</span>(<span class="cl">String</span> advisorId);
+  <span class="kw">Future</span>&lt;<span class="cl">SuitabilityResult</span>&gt; <span class="fn">getSuitability</span>(<span class="cl">String</span> clientId);
+}
+<span class="kw">class</span> <span class="cl">RemoteAdvisorRepository</span> <span class="kw">implements</span> <span class="cl">AdvisorRepository</span> {
+  <span class="kw">final</span> <span class="cl">ApiClient</span> _api;
+  <span class="cl">RemoteAdvisorRepository</span>(<span class="kw">this</span>._api);
+  @override <span class="kw">Future</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Client</span>&gt;&gt; <span class="fn">getClients</span>(<span class="cl">String</span> id) <span class="kw">async</span> {
+    <span class="kw">final</span> data = <span class="kw">await</span> _api.<span class="fn">get</span>(<span class="st">'/advisors/$id/clients'</span>);
+    <span class="kw">return</span> (data <span class="kw">as</span> <span class="cl">List</span>).<span class="fn">map</span>(<span class="cl">Client</span>.fromJson).<span class="fn">toList</span>();
+  }
+}
+<span class="kw">class</span> <span class="cl">MockAdvisorRepository</span> <span class="kw">implements</span> <span class="cl">AdvisorRepository</span> {
+  @override <span class="kw">Future</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Client</span>&gt;&gt; <span class="fn">getClients</span>(<span class="cl">String</span> id) <span class="kw">async</span> =>
+    [<span class="cl">Client</span>(name: <span class="st">'Teste'</span>)];
+}</code></div></div><div class="caderno"><div class="caderno-label">📓 Caderno</div><p><strong>Repository = Bibliotecário dos dados.</strong> Abstrai de onde vêm os dados. Base do Clean Architecture. Mock = trocar implementação nos testes.</p><div class="keys"><span class="key">abstrai fonte</span><span class="key">Clean Architecture</span><span class="key">testável</span><span class="key">mock fácil</span></div></div><div class="fonte">📚 <a href="https://martinfowler.com/eaaCatalog/repository.html" target="_blank">martinfowler.com/eaaCatalog/repository</a> · Fowler, M. (2002). <em>Patterns of Enterprise Application Architecture.</em> Addison-Wesley.</div></div>
+
+    </main>
+  </div>
+  <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+</div>
+
+<!-- =====================================================
+     PAGE: RECOMMENDER
+===================================================== -->
+<div id="page-recommender" class="page">
+  <div class="ai-page-inner">
+    <div class="ai-panel-hero">
+      <h2>Pattern <em>Recommender</em></h2>
+      <p>Descreva seu problema em português. A IA recomenda o Design Pattern ideal, explica o porquê e mostra como implementar em Flutter/Dart.</p>
+    </div>
+    <div id="rec-config"></div>
+    <div class="tfjs-bar" id="tfjsBarRec">
+      <div class="tfjs-dot" id="tfjsDotRec"></div>
+      <span class="tfjs-label">TF.js</span>
+      <span id="tfjsStatusRec">Carregando pré-classificador...</span>
+      <span class="tfjs-hint">Análise local gratuita antes da chamada à API</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Detalhe:</span>
+      <button class="detail-btn active" onclick="setDetail('rec','quick')" data-tab="rec" data-lv="quick">⚡ Rápido</button>
+      <button class="detail-btn" onclick="setDetail('rec','full')" data-tab="rec" data-lv="full">📖 Completo</button>
+      <button class="detail-btn" onclick="setDetail('rec','flutter')" data-tab="rec" data-lv="flutter">🐦 Com Flutter</button>
+    </div>
+    <div class="input-box">
+      <div class="input-box-top">
+        <span class="input-box-label">Descreva seu problema ou cenário</span>
+        <span class="char-count" id="recCC">0/1000</span>
+      </div>
+      <textarea id="recTa" maxlength="1000" placeholder="Ex: Preciso de múltiplas formas de pagamento (Pix, cartão, boleto) que possam ser trocadas em tempo de execução..." oninput="cc('recTa','recCC')"></textarea>
+    </div>
+    <div class="tfjs-preclassify" id="recPreClassify"></div>
+    <div class="examples-row">
+      <span class="ex-label">Exemplos:</span>
+      <span class="ex-chip" onclick="fillEx('rec',0)">Múltiplas formas de pagamento</span>
+      <span class="ex-chip" onclick="fillEx('rec',1)">Notificações push e email</span>
+      <span class="ex-chip" onclick="fillEx('rec',2)">Dados offline/online</span>
+      <span class="ex-chip" onclick="fillEx('rec',3)">Tela com estados de loading</span>
+    </div>
+    <div class="action-row">
+      <button class="btn-analyze" id="recBtn" onclick="analyze('rec')"><span>🧭</span> Recomendar Pattern</button>
+      <button class="btn-ghost" onclick="clearPanel('rec')">Limpar</button>
+    </div>
+    <div id="recResp"></div>
+    <div id="recHistory"></div>
+    <footer class="ai-footer"><p>MIT License · <a href="https://openrouter.ai" target="_blank">OpenRouter</a> · <a href="https://ollama.ai" target="_blank">Ollama</a> · TensorFlow.js · <a href="https://github.com/thabata-marchi" target="_blank">github.com/thabata-marchi</a></p></footer>
+  </div>
+</div>
+
+<!-- =====================================================
+     PAGE: DETECTOR
+===================================================== -->
+<div id="page-detector" class="page">
+  <div class="ai-page-inner">
+    <div class="ai-panel-hero">
+      <h2>Pattern <em>Detector</em></h2>
+      <p>Cole seu código Dart/Flutter. A IA identifica qual(is) Design Pattern(s) estão sendo usados, avalia a implementação e sugere melhorias.</p>
+    </div>
+    <div id="det-config"></div>
+    <div class="tfjs-bar" id="tfjsBarDet">
+      <div class="tfjs-dot" id="tfjsDotDet"></div>
+      <span class="tfjs-label">TF.js</span>
+      <span id="tfjsStatusDet">Carregando pré-classificador...</span>
+      <span class="tfjs-hint">Pré-analisa o código localmente antes da API</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Detalhe:</span>
+      <button class="detail-btn active" onclick="setDetail('det','quick')" data-tab="det" data-lv="quick">⚡ Rápido</button>
+      <button class="detail-btn" onclick="setDetail('det','full')" data-tab="det" data-lv="full">📖 Completo</button>
+      <button class="detail-btn" onclick="setDetail('det','flutter')" data-tab="det" data-lv="flutter">🐦 Com sugestões</button>
+    </div>
+    <div class="input-box">
+      <div class="input-box-top">
+        <span class="input-box-label">Cole seu código Dart / Flutter</span>
+        <span class="char-count" id="detCC">0/3000</span>
+      </div>
+      <textarea id="detTa" class="code-ta" maxlength="3000" placeholder="abstract class PaymentStrategy {
+  Future&lt;bool&gt; processPayment(double amount);
+}..." oninput="cc('detTa','detCC')"></textarea>
+    </div>
+    <div class="tfjs-preclassify" id="detPreClassify"></div>
+    <div class="examples-row">
+      <span class="ex-label">Carregar exemplo:</span>
+      <span class="ex-chip" onclick="fillEx('det',0)">Strategy</span>
+      <span class="ex-chip" onclick="fillEx('det',1)">Observer</span>
+      <span class="ex-chip" onclick="fillEx('det',2)">Repository</span>
+      <span class="ex-chip" onclick="fillEx('det',3)">Singleton</span>
+    </div>
+    <div class="action-row">
+      <button class="btn-analyze" id="detBtn" onclick="analyze('det')"><span>🔍</span> Detectar Pattern</button>
+      <button class="btn-ghost" onclick="clearPanel('det')">Limpar</button>
+    </div>
+    <div id="detResp"></div>
+    <div id="detHistory"></div>
+    <footer class="ai-footer"><p>MIT License · <a href="https://openrouter.ai" target="_blank">OpenRouter</a> · <a href="https://ollama.ai" target="_blank">Ollama</a> · TensorFlow.js · <a href="https://github.com/thabata-marchi" target="_blank">github.com/thabata-marchi</a></p></footer>
+  </div>
+</div>
+
+  <script defer src="assets/js/nav-boot.js"></script>
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
